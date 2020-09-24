@@ -1,0 +1,245 @@
+body {
+  height: 550px;
+  width: 300px;
+  background-color: #C4C4CD;
+  overflow: hidden;
+}
+
+#buttons-div {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px;
+}
+
+.card{
+  overflow-x: hidden;
+}
+
+.caret-off::before {
+  display: none;
+}
+
+.caret-off::after {
+  display: none;
+}
+
+#create-button {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  width: 100px;
+}
+
+.drop-btn{
+  border: none;
+  text-decoration: none;
+  background: transparent;
+}
+
+.drop-btn:focus{
+  outline: none;
+}
+
+
+[id^="edit-selection"]{
+  /* height: 200px; */
+  /* width: 255px; */
+  display: flex;
+  flex-direction: column;
+  /* overflow-y: scroll; */
+  overflow-x: hidden;
+  /* overflow-x: hidden; */
+}
+
+.ed-sel-div{
+  height: 200px;
+  width: 255px;
+  overflow-y: scroll;
+}
+
+.edit-tab{
+  padding: 3px;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid silver;
+  border-bottom: 1px solid silver;
+}
+
+[id^="drop"] {
+  margin-left: auto;
+}
+[id^="edit-selection"] {
+  display: flex;
+}
+
+.menu-btn{
+  display: flex;
+  justify-content: space-between;
+}
+
+.del_tab{
+  border: none;
+  text-decoration: none;
+  background-color: transparent;
+  /* color: silver; */
+}
+
+.del_tab:hover{
+  color: grey;
+}
+
+.dropdown-menu {
+  font-family: geneva;
+  width: 255px;
+  left: -300px;
+}
+
+.dropdown-menu:last-child {
+  right: 0;
+  left: auto;
+}
+
+.del-button {
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  color: white;
+}
+.del-button:active{
+  border: none;
+  text-decoration: none;
+}
+
+.del-button:hover {
+  color: grey;
+}
+
+#group {
+  padding-top: 5px !important;
+}
+
+.grouper{
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  margin: 0px 0px 0px 10px;
+  display: flex;
+  justify-content: end;
+  outline: none !important;
+}
+
+.grouper:focus {
+  outline: none !important;
+}
+
+.groups{
+  padding: 0px 0px 20px 0px;
+}
+
+.group-title {
+  margin-top: 10px;
+  font-family: Courier;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EBECf0;
+  font-weight: bold;
+}
+
+
+.rotate{
+  -moz-transition: all 0.5s linear;
+  -webkit-transition: all 0.5s linear;
+  transition: all 0.5s linear;
+}
+
+.rotate.down{
+  -moz-transform:rotate(45deg);
+  -webkit-transform:rotate(45deg);
+  transform:rotate(45deg);
+}
+
+
+#sessions {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 5px 5px 5px;
+}
+
+.session {
+  color: white;
+  font-family: verdana;
+  font-size: 20px;
+  background-color: #4A4D88;
+  box-shadow: 2px 2px 2px grey;
+  border-radius: 5px;
+  padding-left: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 55px;
+  width: 125px;
+  margin: 5px;
+}
+
+.seshName {
+  font-family: Geneva;
+  font-size: 12px;
+  height: 40px;
+  width: 95px;
+  padding-left: 10px;
+  margin-right: auto;
+  border: 0;
+  box-shadow: 4px 5px 0 -4px grey;
+  background: transparent;
+  color: white;
+}
+
+.seshName::placeholder{
+  color: white;
+}
+
+.seshName:invalid {
+  box-shadow: 4px 5px 0 -4px red;
+}
+
+.seshName:focus {
+  outline: none;
+}
+
+.selections {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 5px;
+  border: 3px solid #F0B823;
+  width: 250px;
+  background-color: white;
+}
+
+.select_container {
+  display: flex;
+  justify-content: center;
+}
+
+#select-all {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  width: 100px;
+}
+
+
+
+.select_tab {
+  width: 240px;
+}
+.select_tab:hover {
+  background-color: #0C94B2;
+}
+
+.tabs-div {
+  overflow-y: scroll;
+  max-height: 250px;
+  overflow-x: hidden;
+}
