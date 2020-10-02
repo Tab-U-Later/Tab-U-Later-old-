@@ -2,14 +2,7 @@
 let selected = false;
 let count = 1;
 let clicked = false;
-/* When dom loads, create the dom elements needed */
-document.addEventListener("DOMContentLoaded", function () {
-  // chrome.storage.sync.clear(); //clear storage (FOR DEV ONLY)
-  let groupMe = document.getElementById('groupMe');
-  selectTabs();
-  createSessions();
 
-})
 
 
 /* Create the sessions saved in storage */
@@ -48,19 +41,19 @@ function createSessions(sessions) {
 
       div.appendChild(dropdown);
 
-
       let menu = document.createElement("div");
       menu.className = "dropdown-menu";
       div.appendChild(menu);
 
-      let card1  = document.createElement("div");
+      //OPEN BUTTON
+      let card1 = document.createElement("div");
       card1.className = "card";
 
       let open = document.createElement("button");
       open.type = "button";
       open.className = "panel-collapse collapse show opener menu-btn btn btn-primary dropdown-item ";
       open.id = `open-${count}`;
-      open.innerText = "open";
+      open.innerText = "Open";
       open.onclick = () => openSession(key);
 
       let icon = document.createElement("i");
@@ -73,13 +66,13 @@ function createSessions(sessions) {
       menu.appendChild(card1);
 
       //REMOVE BUTTON
-      let card2  = document.createElement("div");
+      let card2 = document.createElement("div");
       card2.className = "card";
       let remove = document.createElement("button");
       remove.type = "button";
       remove.className = "panel-collapse collapse show remover menu-btn btn btn-primary dropdown-item";
       remove.id = `remove-${count}`;
-      remove.innerText = "remove";
+      remove.innerText = "Remove";
       remove.onclick = () => removeSession(session.id, key);
 
       let icon2 = document.createElement("i");
@@ -92,14 +85,14 @@ function createSessions(sessions) {
       menu.appendChild(card2);
 
       //EDIT COMPONENT
-      let card3  = document.createElement("div");
+      let card3 = document.createElement("div");
       card3.className = "card";
 
       let edit = document.createElement("a");
       edit.type = "button";
       edit.className = "menu-btn btn btn-primary dropdown-item";
       edit.id = `edit-${count}`;
-      edit.innerText = "edit";
+      edit.innerText = "Edit";
       edit.setAttribute("data-toggle", "collapse");
       edit.setAttribute("href", `.panel-collapse`)
 
@@ -121,20 +114,22 @@ function createSessions(sessions) {
       edit_select_div.id = "edit-parent"
 
       let deep_cnt = 1;
-      for(let i = 0; i < data[key].length; i++){
+      for (let i = 0; i < data[key].length; i++) {
         let elem = document.createElement("div");
-        elem.innerText = data[key][i];
+        console.log(data[key][i]['name'])
+        elem.innerText = data[key][i]['name'];
         elem.className = "edit-tab";
         elem.id = `edit-tab-${count}-${deep_cnt}`
         let but = document.createElement("button");
-        but.className = "del_tab"
-        but.onclick = () => updateSession(key, data[key], data[key][i], elem.id);
+        but.className = "del-tab"
+        but.onclick = () => updateSession(key, data[key], data[key][i]['name'], elem.id);
 
         let delTab = document.createElement("i");
         delTab.className = "fas fa-times";
         delTab.setAttribute("aria-hidden", "true");
         but.appendChild(delTab)
-        elem.appendChild(but);3
+        elem.appendChild(but);
+        3
 
         edit_select_div.appendChild(elem);
         deep_cnt++;
@@ -156,7 +151,9 @@ function createSessions(sessions) {
 
 function updateSession(sessionName, seshArray, tabName, elemId) {
 
-  let newSesh = seshArray.filter((value, index, arr) => {return value !== tabName});
+  let newSesh = seshArray.filter((value, index, arr) => {
+    return value['name'] !== tabName
+  });
   chrome.storage.sync.set({
     [sessionName]: newSesh
   });
@@ -175,9 +172,13 @@ function createSession() {
 
   toggleAll();
   let tab_urls = [];
+  // console.log(checkboxes);
   console.log(checkboxes);
   for (let checkbox of checkboxes) {
-    tab_urls.push(checkbox.parentElement.innerText)
+    tab_urls.push({
+      name: checkbox.parentElement.innerText,
+      url: checkbox.childNodes[0].value
+    })
   }
 
   let sessions_div = document.getElementById("sessions");
@@ -222,15 +223,19 @@ function selectTabs() {
   let buttons_div = document.createElement("div");
   buttons_div.id = "buttons-div";
 
+  let title = document.createElement('p');
+  title.innerText = "Opened Tabs";
+  selection_div.appendChild(title);
+
   let select_all = document.createElement("button");
   select_all.className = "btn select-all btn-secondary";
   select_all.id = "select-all"
   select_all.onclick = () => toggleAll();
-  select_all.innerText = "select all";
+  select_all.innerText = "Select All";
   buttons_div.appendChild(select_all);
 
   let create_button = document.createElement("button");
-  create_button.innerText = "create session"
+  create_button.innerText = "Create Session"
   create_button.className = "btn btn-success create-session"
   create_button.id = "create-button"
   create_button.style.visibility = "hidden"
@@ -249,8 +254,14 @@ function selectTabs() {
       let title = (tab.title.length > 20 ? tab.title.substring(0, 20) + "..." : tab.title);
       let container = document.createElement("label");
       container.className = "select_tab"
-      container.innerHTML = `<input type="checkbox"></input> ${title} `
-
+      let input = document.createElement("input");
+      input.type = 'checkbox'
+      container.innerText = title;
+      let param = document.createElement("param");
+      param.name = "tab-url"
+      param.value = tab.url;
+      input.appendChild(param);
+      container.appendChild(input)
       tabs_div.appendChild(container);
     })
   })
@@ -269,7 +280,7 @@ function toggleAll() {
   selected = !selected;
   document.getElementById("create-button").style.visibility = (selected === true ? "visible" : "hidden")
   document.getElementById("select-all").className = (selected === true ? "btn btn-success" : "btn  btn-secondary")
-  document.getElementById("select-all").innerText = (selected === true ? "unselect all" : "select all")
+  document.getElementById("select-all").innerText = (selected === true ? "Unselect All" : "Select All")
 }
 
 /* Remove session from storage and DOM */
@@ -287,9 +298,13 @@ function removeSession(sessionId, sessionName) {
 
 /* Open a session when user clicks to open */
 function openSession(sessionName) {
+  let urls = []
   chrome.storage.sync.get([sessionName], function (data) {
+    for (let i = 0; i < data[sessionName].length; i++) {
+      urls.push(data[sessionName][i]['url'])
+    }
     chrome.windows.create({
-      url: data[sessionName]
+      url: urls
     })
   })
 }
@@ -297,41 +312,55 @@ function openSession(sessionName) {
 document.getElementById("selections").addEventListener("change", () => {
   if (document.querySelectorAll('input[type="checkbox"]:checked').length >= 1) {
     document.getElementById("select-all").className = "btn btn-success"
-    document.getElementById("select-all").innerText = "unselect all"
+    document.getElementById("select-all").innerText = "Unselect All"
     let create_button = document.getElementById("create-button")
     create_button.style.visibility = "visible";
   }
 })
 
-$(document).ready(function(){
 
+/* When dom loads, create the dom elements needed */
+$(document).on("DOMContentLoaded", function () {
+  // chrome.storage.sync.clear(); //clear storage (FOR DEV ONLY)
+  let groupMe = document.getElementById('groupMe');
+  selectTabs();
+  createSessions();
 
-  // $('.dropdown').on('show.bs.dropdown', function (event) {
-  //   console.log($(this));
-  //   $('.remover').collapse('show');
-  //   $('.opener').collapse('show');
-  //   $('.edit-select-card').collapse("hide");
-  //   // var accordion = $(this).find($(this).data('accordion'));
-  //   // accordion.find('.panel-collapse.in').collapse('hide');
-  // });
-
-
-  // $(".dropdown").click(function(e){
-  //   console.log("hi");
-  //   // e.preventDefault();
-  //   e.stopPropagation();
-  // })
-  console.log($('.accordion'))
-  $('.accordion').on('click', 'a[data-toggle="collapse"]', function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-    // $($(this).data('parent')).find('.panel-collapse.in').collapse('hide');
-    $($(this).attr('href')).collapse();
-  });
-
-  $("#groupMe").on('click', function(){
-    $(this).toggleClass("down")
-  })
 })
 
 
+$(window).on("load", function () {
+
+  $("#groupMe").on('click', function () {
+    $(this).toggleClass("down")
+  });
+
+  setTimeout(function () {
+    //show edit selections, stop dropdown from closing on click
+    $('.accordion').on('click', 'a[data-toggle="collapse"]', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      $($(this).attr('href')).collapse('toggle');
+    });
+
+    //revert to default when dropdown opened
+    $('.accordion').on('hide.bs.dropdown', function (event) {
+      $('.remover').collapse('show');
+      $('.opener').collapse('show');
+      $('.edit-select-card').collapse("hide");
+    });
+
+    //prevent dropdown from closing when deleting tabs
+    $('.accordion').on('click', '.del-tab', function (event) {
+      console.log(event);
+      // event.preventDefault();
+      // event.stopPropagation();
+    });
+
+    $('.del-tab').on('click', function (e) {
+      console.log(e);
+    })
+
+  }, 1000);
+
+});
