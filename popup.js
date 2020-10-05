@@ -116,13 +116,12 @@ function createSessions(sessions) {
       let deep_cnt = 1;
       for (let i = 0; i < data[key].length; i++) {
         let elem = document.createElement("div");
-        console.log(data[key][i]['name'])
         elem.innerText = data[key][i]['name'];
         elem.className = "edit-tab";
         elem.id = `edit-tab-${count}-${deep_cnt}`
         let but = document.createElement("button");
         but.className = "del-tab"
-        but.onclick = () => updateSession(key, data[key], data[key][i]['name'], elem.id);
+        but.onclick = () => updateSession(key, data[key][i]['name'], elem.id);
 
         let delTab = document.createElement("i");
         delTab.className = "fas fa-times";
@@ -149,19 +148,21 @@ function createSessions(sessions) {
   })
 }
 
-function updateSession(sessionName, seshArray, tabName, elemId) {
+function updateSession(sessionName, tabName, elemId) {
+  chrome.storage.sync.get([sessionName], function(data){
+    let seshArray = data[sessionName]
+    let newSesh = seshArray.filter((value, index, arr) => {
+      return value['name'] !== tabName
+    });
 
-  let newSesh = seshArray.filter((value, index, arr) => {
-    return value['name'] !== tabName
-  });
-  chrome.storage.sync.set({
-    [sessionName]: newSesh
-  });
+    chrome.storage.sync.set({
+      [sessionName]: newSesh
+    });
 
-  let elem = document.getElementById(elemId)
-  let elem_parent = document.getElementById('edit-parent')
-  elem_parent.removeChild(elem);
-
+    let elem = document.getElementById(elemId)
+    let elem_parent = document.getElementById('edit-parent')
+    elem_parent.removeChild(elem);
+  })
 }
 
 function createSession() {
@@ -172,12 +173,11 @@ function createSession() {
 
   toggleAll();
   let tab_urls = [];
-  // console.log(checkboxes);
   console.log(checkboxes);
   for (let checkbox of checkboxes) {
     tab_urls.push({
       name: checkbox.parentElement.innerText,
-      url: checkbox.childNodes[0].value
+      url: checkbox.value
     })
   }
 
@@ -223,9 +223,9 @@ function selectTabs() {
   let buttons_div = document.createElement("div");
   buttons_div.id = "buttons-div";
 
-  let title = document.createElement('p');
-  title.innerText = "Opened Tabs";
-  selection_div.appendChild(title);
+  // let title = document.createElement('p');
+  // title.innerText = "Opened Tabs";
+  // selection_div.appendChild(title);
 
   let select_all = document.createElement("button");
   select_all.className = "btn select-all btn-secondary";
@@ -247,22 +247,28 @@ function selectTabs() {
   let tabs_div = document.createElement("div");
   tabs_div.className = "tabs-div";
 
+  let tab_count = 0;
   chrome.tabs.query({
     currentWindow: true
   }, function (tabs) {
     tabs.forEach(tab => {
       let title = (tab.title.length > 20 ? tab.title.substring(0, 20) + "..." : tab.title);
+      let diver = document.createElement("div");
+      diver.className = "label-div";
       let container = document.createElement("label");
       container.className = "select_tab"
+      container.innerText = title;
+      container.style = "padding-left: 3px;"
+
       let input = document.createElement("input");
       input.type = 'checkbox'
-      container.innerText = title;
-      let param = document.createElement("param");
-      param.name = "tab-url"
-      param.value = tab.url;
-      input.appendChild(param);
-      container.appendChild(input)
-      tabs_div.appendChild(container);
+      input.value = tab.url;
+      input.id = `tab-${tab_count++}`
+
+      container.setAttribute("for", `${input.id}`)
+      diver.appendChild(input);
+      diver.appendChild(container)
+      tabs_div.appendChild(diver);
     })
   })
   selection_div.appendChild(tabs_div);
@@ -316,6 +322,12 @@ document.getElementById("selections").addEventListener("change", () => {
     let create_button = document.getElementById("create-button")
     create_button.style.visibility = "visible";
   }
+  else{
+    document.getElementById("select-all").className = "btn btn-secondary"
+    document.getElementById("select-all").innerText = "Select All"
+    let create_button = document.getElementById("create-button")
+    create_button.style.visibility = "hidden";
+  }
 })
 
 
@@ -325,7 +337,6 @@ $(document).on("DOMContentLoaded", function () {
   let groupMe = document.getElementById('groupMe');
   selectTabs();
   createSessions();
-
 })
 
 
@@ -336,30 +347,29 @@ $(window).on("load", function () {
   });
 
   setTimeout(function () {
-    //show edit selections, stop dropdown from closing on click
-    $('.accordion').on('click', 'a[data-toggle="collapse"]', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      $($(this).attr('href')).collapse('toggle');
-    });
-
-    //revert to default when dropdown opened
-    $('.accordion').on('hide.bs.dropdown', function (event) {
-      $('.remover').collapse('show');
-      $('.opener').collapse('show');
-      $('.edit-select-card').collapse("hide");
-    });
-
-    //prevent dropdown from closing when deleting tabs
-    $('.accordion').on('click', '.del-tab', function (event) {
-      console.log(event);
-      // event.preventDefault();
-      // event.stopPropagation();
-    });
-
-    $('.del-tab').on('click', function (e) {
-      console.log(e);
-    })
+    //stop dropdown from closing on click
+      $(function() {
+      $('.dropdown').on({
+          "click": function(event) {
+            if ($(event.target).closest('.dropdown-toggle').length) {
+              $(this).data('closable', true);
+            } else {
+              $(this).data('closable', false);
+            }
+          },
+          "hide.bs.dropdown": function(event) {
+            hide = $(this).data('closable');
+            $(this).data('closable', true);
+            return hide;
+          },
+          //open main dropdown items when opening again
+          "hidden.bs.dropdown": function(event){
+            $('.remover').collapse('show');
+            $('.opener').collapse('show');
+            $('.edit-select-card').collapse("hide");
+          }
+      });
+  });
 
   }, 1000);
 
